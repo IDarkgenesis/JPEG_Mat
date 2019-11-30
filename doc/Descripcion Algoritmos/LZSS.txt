@@ -1,0 +1,53 @@
+En este archivo procederé a explicar la implementación del algoritmo LZSS.
+
+Tenemos la función compress que recibe como parámetro el fichero a comprimir, el 
+algoritmo va leyendo los carácteres uno a uno y van formando parte de la ventana 
+corrediza, dentro del lookahead si encuentra alguna coincidencia busca en el 
+diccionario la posición en donde el carácter ya ha aparecido. Una vez lo encuentra 
+intenta mirar los caracteres siguientes en el lookahead y en la ventana corrediza 
+para ver si se encuentran más repeticiones, sin sobrepasar el límite máximo de 
+coincidencias. Cuando se encuentra una coincidencia el algoritmo procede a guardar 
+un pair<position, matchLen> que referencia a la posición donde se ha encontrado la 
+coincidencia y el tamaño de la misma, además guarda en una cadena de bits un 1 para 
+diferenciarlo del resto de chars. Si no hay coincidencias solamente se guarda el 
+caracter y en la cadena de bits un 0. También hay una variable size que calcula el 
+tamaño del string comprimido para poder poder tratarlo en la descompresión.
+
+Para poder descomprimir, recuperamos la información necesaria. Y vamos leyendo el 
+array de bits para saber si el caracter es un char o un pair, en el caso de ser 1 
+cargamos desde la posición que nos marca (pair.position) el numero de caracteres 
+repetidos ( pair.matchLen ). Por el contrario si el array de bits es un 0 leemos 
+solamente un char. Así hasta el final del archivo.
+
+El pseudocodigo para comprimir es el siguiente:
+
+    while(lookAhead no esté vacío)
+    {
+        obtener puntero (position,matchLen) con el matchLen
+        máximo que se encuentre dentro de la ventana corrediza;
+
+        if (lenght > MIN_MATCH_LENGHT) {
+            guardar pair(position,matchLen);
+            desplazar los carácteres el matchLen encontrado;
+        }
+        else {
+            guardar el carácter actual del lookahead;
+            desplazar un carácter en la ventana;
+        }
+    }
+
+El pseudocodigo para descomprimir es el siguiente:
+
+    while (todo el String comprimido no recorrido )
+    {
+        mirar Array de bits para saber si el caracter és 
+        un char o un pair;
+
+        if (bit = 0) {
+            cargar el caracter;
+        }
+        else {
+            cargar todo los caracteres que marque el 
+            matchLen, desde la posición indicada;
+        }
+    }

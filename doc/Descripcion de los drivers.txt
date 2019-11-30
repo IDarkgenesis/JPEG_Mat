@@ -1,0 +1,42 @@
+A continuación se explican los drivers utilizados para hacer el testing de los algortimos sin pérdida (LZ78, LZSS, LZW):
+
+Test 1: void.txt
+    El test consiste en comprimir y descomprimir un archivo vacío.    
+
+Test 2: line.txt
+    El test consiste en comprimir y descomprimir solamente una línea de texto.
+
+Test 3: chars.txt
+    El test consiste en comprimir y descomprimir un archivo con todos los carácteres UTF-8.
+
+Test 4: 4kb.txt
+    El test consiste en comprimir y descomprimir un archivo de 4kilobytes con un texto aleatorio.
+
+Test 5: 8kb.txt
+    El test consiste en comprimir y descomprimir un archivo de 8kilobytes con un texto aleatorio.
+
+Test 6: 6mb.txt
+    El test consiste en comprimir y descomprimir un archivo de 6megabytes con un texto aleatorio.
+
+Test 7: 15mb.txt
+    El test consiste en comprimir y descomprimir un archivo de 15megabytes con un texto aleatorio.
+
+Test 8: catala.txt
+    El test consiste en comprimir y descomprimir un archivo en catalán.
+
+Test 9: español.txt
+    El test consiste en comprimir y descomprimir un archivo en español.
+
+Test 10: english.txt
+    El test consiste en comprimir y descomprimir un archivo en inglés.
+
+Drivers utilizados para el testing del algoritmo JPEG:
+
+Test 1: 1_4MB.ppm
+    El test consiste en comprimir y descomprimir una imagen en formato ppm de un tamaño de 1.4Megabytes que es divisble en submatrices de 8x8.
+
+Test 2: Nodiv64.ppm
+    El test consiste en comprimir y descomprimir una imagen en formato ppm en el cual no se puede dividir la imagen en submatrices de 8x8 y comprobar que se ejecuta igualmente.
+
+Test 3: 6MB.ppm
+    El test consiste en comprimir y descomprimir una imagen en formato ppm de un tamaño mayor para comprobar que con imagenes de mayor tamaño el programa sigue funcionando.

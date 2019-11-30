@@ -1,0 +1,36 @@
+En este documento se explica el funcionamiento del algoritmo LZ78 implementado junto con una versión en pseudocódigo del algoritmo.
+
+En el algoritmo se lee un fichero, se inizializa un diccionario vacio y si el caracter a leer no se encuentra en el diccionario, se
+guarda en el mismo con una pareja del caracter y un entero. En caso de que se encuentre el entero apuntara a donde se encuentre ya el 
+entero en el diccionario.
+
+Para decomprimir se leen parejas de entero y caracter y se guardan los caracteres en un diccionario originalmente vacio 
+para formar el fichero original.
+
+  begin
+     initialize a dictionary by empty phrase P
+     while (not EOF) do
+      begin
+        readSymbol(X)
+        if (F.X> is in the dictionary) then
+           F = F.X   
+        else 
+         begin
+           output(pointer(F),X)
+           encode X to the dictionary
+           initialize phrase F by empty character
+         end
+      end
+  end  
+  
+  DECODING 
+  begin
+    init dictionary by an empty phrase
+     while (not EOF) do
+      begin
+        read pair of index and character (i,X) from input
+        put new phrase phrase(i).X into distionary
+        generate phrase to the output 
+      end
+ end
+

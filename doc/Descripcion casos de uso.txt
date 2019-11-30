@@ -1,0 +1,61 @@
+Caso de uso : Compress
+
+1.El usuario ejecuta el Programa.
+
+2.El usuario elije la opción Compress.
+
+3.El usuario introduce archivo a comprimir.
+
+4.El usuario introduce la carpeta destino.
+
+5.El usuario introduce el nombre del fichero comprimido.
+
+6.El usuario especifica el algoritmo usado para la compresión.
+
+7.El usuario ve las estadísticas.
+
+Escenarios excepcionales:
+
+-El archivo a comprimir no es archivo o no existe:
+1.Volver al paso 3.
+
+-La carpeta destino no es una carpeta o no existe:
+1.Volver al paso 4.
+
+-El nombre del fichero comprimido ya existe:
+1.Volver al paso 5.
+
+
+
+
+Caso de uso : Decompress
+
+1.El usuario ejecuta el Programa.
+
+2.El usuario elije la opción de descomprimir.
+
+3.El usuario introduce el archivo comprimido. 
+
+4.El usuario introduce la carpeta destino.
+
+5.El usuario ve las estadísticas.
+
+Escenarios excepcionales: 
+
+-El archivo no es un archivo comprimido o no es archivo:
+1.Volver al paso 3.
+
+-El fichero ya existe en la carpeta destino:
+1.Introducir nuevo nombre para el fichero descomprimido. 
+
+
+
+Caso de uso : Run tests
+
+1.El usuario ejecuta el Programa.
+
+2.El usuario elije la opción Run tests.
+
+3.El usuario elije algoritmo con el que hacer los tests o hacer el test de todos los algoritmos.
+
+4.El usuario ve los resultados y estadísticas.  

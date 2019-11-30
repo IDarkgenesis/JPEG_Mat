@@ -1,0 +1,2 @@
+Para ejecutar los drivers, hay que ejecutar el programa y elegir la opción 3 (Run tests).
+Luego elejir con que algoritmo quieres hacer los tests o hacer los tests de todos los algoritmos.

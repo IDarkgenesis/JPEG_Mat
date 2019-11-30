@@ -1,0 +1,39 @@
+doc:
+  UML: Pol Aguilar
+  Descripción casos de uso : Pol Aguilar
+  Diagrama de casos de uso: Pol Aguilar
+  Descripcion de los drivers:  Sebastian Acurio
+  DoxyGen: Pau Val
+  Descripcion Algoritmos:
+    LZ78: Pol Aguilar
+    LZSS: Sebastian Acurio
+    LZW: Pau Val
+    JPEG: Bartomeu Perelló
+src:
+  dominio:
+    algoritmos:
+      Algorithm: Pau Val
+      LZ78: Pol Aguilar
+      LZSS: Sebastian Acurio
+      LZW: Pau Val
+      JPEG: Bartomeu Perelló
+    Actor: Pau Val
+    ByteArrayHelper: Pol Aguilar
+    Compressor: Pau Val
+    Decompressor: Pau Val
+    HuffTree: Bartomeu Perelló
+    Pair: Bartomeu Perelló
+  persistencia:
+    CompressedFile : Pau Val
+    File: Pau Val
+    UncompressedFile: Pau Val
+  presentación:
+    Menu : Pau Val
+  Main : Pau Val
+tests:
+  Tester: Sebastian Acurio
+  TestMenu: Sebastian Acurio
+  LZ78Tester: Sebastian Acurio
+  LZSSTester: Sebastian Acurio
+  LZWTester: Sebastian Acurio
+  JPEGTester: Sebastian Acurio
