@@ -30,6 +30,8 @@ public class JPEG extends Algorithm
     {
         byte[] data= uncompressed.readAll();
 
+        modQuant(Q);
+
         byte[] version= new byte[3];
         version[0]=data[0];
         version[1]=data[1];
@@ -103,18 +105,6 @@ public class JPEG extends Algorithm
                 V[i][j]= (short)(128 + ( 0.5 * R ) - ( 0.418688 * G ) - ( 0.081312 * B ));
             }
         }
-        /*
-        for(int i=0,j=0; it < imageSizeX3; it+=3, ++j) {
-            short R,G,B;
-            R= (short) (data[it-2] & 0x00FF);
-            G= (short) (data[it-1] & 0x00FF);
-            B= (short) (data[it] & 0x00FF);
-
-            Y[i][j]= (short)(0 + ( 0.299 * R ) + ( 0.587 * G ) + ( 0.114 * B ) );
-            U[i][j]= (short)(128 - ( 0.168736 * R ) - (0.331264 * G ) + (0.5 * B ));
-            V[i][j]= (short)(128 + ( 0.5 * R ) - ( 0.418688 * G ) - ( 0.081312 * B ));
-        }
-        */
 
         //RESTAR 128 PARA PODER APLICAR DCT(FUNCIÓ AMB COSINUS, VALORS ENTRE -128,127)
         for(int i=0; i < h; i++){
@@ -171,49 +161,6 @@ public class JPEG extends Algorithm
             }
         }
 
-        /*
-        for (int i = 0; i < max_iterations; i++) {
-            int u=0;
-            int v=0;
-            for (int j = 0; j < 64; j++) {
-                if(v%8 == 0 && v!=0) {
-                    u++;
-                    v=0;
-                }
-
-                if(u == 0)alphaU= 1.0/Math.sqrt(2);
-                else alphaU= 1;
-                if(v == 0)alphaV= 1.0/Math.sqrt(2);
-                else alphaV= 1;
-
-                float x,y;
-                x=y=0;
-                short YAUX=0;
-                short UAUX=0;
-                short VAUX=0;
-                for (int k = 0; k < 64; k++) {
-                    if(y%8 == 0 && y!=0){
-                        x++;
-                        y=0;
-                    }
-                    double calc= ( Math.cos( ((2*x+1)*Math.PI*u)/16 ) * Math.cos( ((2*y+1)*Math.PI*v)/16 ) );
-
-                    YAUX += (short)( ( Y[][] * calc ) );
-                    UAUX += (short)( ( U[][] * calc ) );
-                    VAUX += (short)( ( V[][] * calc ) );
-
-                    ++y;
-                }
-                double calc= (1.0/4) * alphaU * alphaV;
-                YD[][]= (short)(YAUX * calc);
-                UD[][]= (short)(UAUX * calc);
-                VD[][]= (short)(VAUX * calc);
-                ++v;
-            }
-        }
-        */
-
-
         //Cuantification
         for (int i = 0; i < iiterations; i++) {
             for (int j = 0; j < jiterations; j++) {
@@ -221,8 +168,8 @@ public class JPEG extends Algorithm
                 for (int u = 0; u < 8; u++) {
                     for (int v = 0; v < 8; v++) {
                         YD[(8*i)+u][(8*j)+v]/= cuant_mat_lum[(u*8)+v];
-                        UD[(8*i)+u][(8*j)+v]/= cuant_mat_crom[(u*8)+v];
-                        VD[(8*i)+u][(8*j)+v]/= cuant_mat_crom[(u*8)+v];
+                        UD[(8*i)+u][(8*j)+v]/= cuant_mat_lum[(u*8)+v];
+                        VD[(8*i)+u][(8*j)+v]/= cuant_mat_lum[(u*8)+v];
                     }
                 }
 
@@ -232,6 +179,7 @@ public class JPEG extends Algorithm
         ArrayList<Short> resY= new ArrayList<>();
         ArrayList<Short> resU= new ArrayList<>();
         ArrayList<Short> resV= new ArrayList<>();
+
 
 
         //SIMPLIFICAR ARRAYS
@@ -359,6 +307,8 @@ public class JPEG extends Algorithm
     {
         byte[] data= compressedBytes.readAll();
 
+        modQuant(Q);
+
         //RESTAURAR HASHMAP
         int it=0;
         int hs=( ( (data[it++] & 0xFF) << 8) | (data[it++] & 0xFF) );
@@ -391,159 +341,125 @@ public class JPEG extends Algorithm
 
         //RESTAURAR VALORS
         int pos=0;
-        boolean keyFound=false,first=true;
+        boolean keyFound=false,first=true,zeros=false;
         String key="";
-        int bit=7,putted=0;
+        int bit=7;
         byte actByte=0;
         byte[] val = new byte[1];
+        Short elem=0;
 
-        //RESTAURAR Y
-        while(pos < imageSize){
-            while(! keyFound) {
-                if(bit < 0 || first){
-                    first=false;
-                    bit=7;
-                    actByte = data[it++];
-                }
-                if(pos%64 == 0)putted=0;
+        int iiterations= h/8, jiterations=w/8;
 
-                val[0]= (byte) ((actByte >>> bit--) & 0x01);
-                val[0]= (byte)asciiDigits[val[0]];
-                String aux= new String(val);
-                key+=aux;
-
-                Short elem=hash.get(key);
-                if(elem != null){
-                    if(elem == 3000){
-                        int insertions=64-putted,o=0;
-                        while(o < insertions){
-                            Y[pos++]=(short)0;
-                            ++o;
-                        }
-                        putted=0;
-                    }
-                    else {
-                        Y[pos++]=elem;
-                        ++putted;
-                    }
-                    keyFound=true;
-                }
-            }
-            keyFound=false;
-            key="";
-        }
-
-        pos=0;
-        key="";
-        //RESTAURAR U
-        while(pos < imageSize){
-            while(! keyFound) {
-                if(bit < 0){
-                    bit=7;
-                    actByte = data[it++];
-                }
-                if(pos%64 == 0)putted=0;
-
-                val[0]= (byte) ((actByte >>> bit--) & 0x01);
-                val[0]= (byte)asciiDigits[val[0]];
-                String aux= new String(val);
-                key+=aux;
-
-                Short elem=hash.get(key);
-                if(elem != null){
-                    if(elem == 3000){
-                        int insertions=64-putted,o=0;
-                        while(o < insertions){
-                            U[pos++]=(short)0;
-                            ++o;
-                        }
-                        putted=0;
-                    }
-                    else {
-                        U[pos++]=elem;
-                        ++putted;
-                    }
-                    keyFound=true;
-                }
-            }
-            keyFound=false;
-            key="";
-        }
-
-        pos=0;
-        key="";
-        //RESTAURAR V
-        while(pos < imageSize){
-            while(! keyFound) {
-                if(bit < 0){
-                    bit=7;
-                    actByte = data[it++];
-                }
-                if(pos%64 == 0)putted=0;
-
-                val[0]= (byte) ((actByte >>> bit--) & 0x01);
-                val[0]= (byte)asciiDigits[val[0]];
-                String aux= new String(val);
-                key+=aux;
-
-                Short elem=hash.get(key);
-                if(elem != null){
-                    if(elem == 3000){
-                        int insertions=64-putted,o=0;
-                        while(o < insertions){
-                            V[pos++]=(short)0;
-                            ++o;
-                        }
-                        putted=0;
-                    }
-                    else {
-                        V[pos++]=elem;
-                        ++putted;
-                    }
-                    keyFound=true;
-                }
-            }
-            keyFound=false;
-            key="";
-        }
-
-
-       //CREAR MATRIUS
+        //CREAR MATRIUS
         short[][] YD= new short[h][w];
         short[][] UD= new short[h][w];
         short[][] VD= new short[h][w];
 
-        boolean yz,uz,vz;
-        int iiterations= h/8, jiterations=w/8, itY=0, itU=0, itV=0;
-
+        //RESTAURAR Y
         for (int i = 0; i < iiterations; i++) {
             for (int j = 0; j < jiterations; j++) {
 
                 for (int u = 0; u < 8; u++) {
                     for (int v = 0; v < 8; v++) {
-                        yz= Y[itY] == 3000;
-                        uz= U[itU] == 3000;
-                        vz= V[itV] == 3000;
 
-                        if(yz)YD[(i*8)+u][(j*8)+v]=0;
-                        else YD[(i*8)+u][(j*8)+v]=Y[itY];
+                        while(! keyFound && !zeros) {
+                            if(bit < 0 || first){
+                                first=false;
+                                bit=7;
+                                actByte = data[it++];
+                            }
 
-                        if(uz)UD[(i*8)+u][(j*8)+v]=0;
-                        else UD[(i*8)+u][(j*8)+v]=U[itU];
+                            val[0]= (byte) ((actByte >>> bit--) & 0x01);
+                            val[0]= (byte)asciiDigits[val[0]];
+                            String aux= new String(val);
+                            key+=aux;
 
-                        if(vz)VD[(i*8)+u][(j*8)+v]=0;
-                        else VD[(i*8)+u][(j*8)+v]=V[itV];
+                            elem=(hash.get(key));
+                            if(elem != null){
+                                if(elem == 3000) zeros=true;
+                                keyFound=true;
+                            }
+                        }
+                        key="";
+                        keyFound=false;
 
-                        if(! yz) ++itY;
-                        if(! uz) ++itU;
-                        if(! vz) ++itV;
+                        if(zeros)YD[(8*i)+u][(8*j)+v]=0;
+                        else YD[(8*i)+u][(8*j)+v]=elem;
                     }
-                    yz=false;
-                    uz=false;
-                    vz=false;
                 }
+                zeros=false;
+            }
+        }
 
+        //RESTAURAR U
+        for (int i = 0; i < iiterations; i++) {
+            for (int j = 0; j < jiterations; j++) {
 
+                for (int u = 0; u < 8; u++) {
+                    for (int v = 0; v < 8; v++) {
+
+                        while(! keyFound && !zeros) {
+                            if(bit < 0 || first){
+                                first=false;
+                                bit=7;
+                                actByte = data[it++];
+                            }
+
+                            val[0]= (byte) ((actByte >>> bit--) & 0x01);
+                            val[0]= (byte)asciiDigits[val[0]];
+                            String aux= new String(val);
+                            key+=aux;
+
+                            elem=hash.get(key);
+                            if(elem != null){
+                                if(elem == 3000) zeros=true;
+                                keyFound=true;
+                            }
+                        }
+                        key="";
+                        keyFound=false;
+
+                        if(zeros)UD[(8*i)+u][(8*j)+v]=0;
+                        else UD[(8*i)+u][(8*j)+v]=elem;
+                    }
+                }
+                zeros=false;
+            }
+        }
+
+        //RESTAURAR V
+        for (int i = 0; i < iiterations; i++) {
+            for (int j = 0; j < jiterations; j++) {
+
+                for (int u = 0; u < 8; u++) {
+                    for (int v = 0; v < 8; v++) {
+
+                        while(! keyFound && !zeros) {
+                            if(bit < 0 || first){
+                                first=false;
+                                bit=7;
+                                actByte = data[it++];
+                            }
+
+                            val[0]= (byte) ((actByte >>> bit--) & 0x01);
+                            val[0]= (byte)asciiDigits[val[0]];
+                            String aux= new String(val);
+                            key+=aux;
+
+                            elem=hash.get(key);
+                            if(elem != null){
+                                if(elem == 3000) zeros=true;
+                                keyFound=true;
+                            }
+                        }
+                        key="";
+                        keyFound=false;
+
+                        if(zeros)VD[(8*i)+u][(8*j)+v]=0;
+                        else VD[(8*i)+u][(8*j)+v]=elem;
+                    }
+                }
+                zeros=false;
             }
         }
 
@@ -554,8 +470,8 @@ public class JPEG extends Algorithm
                 for (int u = 0; u < 8; u++) {
                     for (int v = 0; v < 8; v++) {
                         YD[(8*i)+u][(8*j)+v]*= cuant_mat_lum[(u*8)+v];
-                        UD[(8*i)+u][(8*j)+v]*= cuant_mat_crom[(u*8)+v];
-                        VD[(8*i)+u][(8*j)+v]*= cuant_mat_crom[(u*8)+v];
+                        UD[(8*i)+u][(8*j)+v]*= cuant_mat_lum[(u*8)+v];
+                        VD[(8*i)+u][(8*j)+v]*= cuant_mat_lum[(u*8)+v];
                     }
                 }
 
@@ -617,6 +533,7 @@ public class JPEG extends Algorithm
                 VN[i][j]+=128;
             }
         }
+
         short[] R= new short[imageSize];
         short[] G= new short[imageSize];
         short[] B= new short[imageSize];
@@ -663,8 +580,10 @@ public class JPEG extends Algorithm
         return RES;
     }
 
+    private int Q=50;
+
     /** Matriz utilizada para reducir las bajas frequiencias en el canal de luminosidad Y*/
-    private static float[] cuant_mat_lum= {
+    private static double[] cuant_mat_lum= {
             16,11,10,16,24,40,51,61,
             12,12,14,19,26,58,60,55,
             14,13,16,24,40,57,69,56,
@@ -675,17 +594,7 @@ public class JPEG extends Algorithm
             72,92,95,98,112,100,103,99
     };
 
-    /** Matriz utilizada para reducir las bajas frequiencias en los canales cromaticos Cb=U,, Cr=V*/
-    private  static float[] cuant_mat_crom={
-            17,18,24,47,99,99,99,99,
-            18,21,26,66,99,99,99,99,
-            24,26,56,99,99,99,99,99,
-            47,66,99,99,99,99,99,99,
-            99,99,99,99,99,99,99,99,
-            99,99,99,99,99,99,99,99,
-            99,99,99,99,99,99,99,99,
-            99,99,99,99,99,99,99,99
-    };
+
     /** Array para poder generar un cambio de un digito a su equivalente en carácter*/
     private static char[] asciiDigits={'0','1','2','3','4','5','6','7','8','9'};
 
@@ -807,6 +716,20 @@ public class JPEG extends Algorithm
             res.add((short)3000);
         }
         */
+    }
+
+    /** Funcion que modifica la matriz de cuantificación
+     * @param Q Valor que indica el indice de calidad a comprimir
+     * */
+    private void modQuant(int Q){
+        int S;
+        if(Q < 50) S= 5000/Q;
+        else S= 200 - 2*Q;
+
+        for (int i = 0; i < 64; i++) {
+            cuant_mat_lum[i]= Math.floor( ( S * cuant_mat_lum[i] + 50) / 100 );
+            if(cuant_mat_lum[i] == 0) cuant_mat_lum[i]=1;
+        }
     }
 
     /**
